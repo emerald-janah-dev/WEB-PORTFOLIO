@@ -58,36 +58,45 @@
         revealEls.forEach(function (el) { el.classList.add('revealed'); });
     }
 
-    /* Team hover: show fullscreen GIF behind the team section when any member-card is hovered.
-       Each .member-card may define a `data-hover-gif` attribute with the GIF URL. */
+    /* Team hover: apply a per-card color scheme to the page when hovering a member card.
+       Each .member-card may define data-accent-*, data-blue-*, data-bg-*, data-text-* for light/dark variants. */
     (function () {
-        var team = document.getElementById('team');
-        if (!team) return;
+        var root = document.documentElement;
         var cards = document.querySelectorAll('.team-grid .member-card');
         if (!cards || !cards.length) return;
 
+        var varNames = ['--accent', '--blue', '--bg', '--text', '--photo-text'];
+        var original = {};
+        var comp = getComputedStyle(root);
+        varNames.forEach(function (v) { original[v] = comp.getPropertyValue(v) || ''; });
+
         cards.forEach(function (card) {
-            // support per-mode GIFs: use data-hover-gif-light and data-hover-gif-dark
-            var gifLight = card.getAttribute('data-hover-gif-light');
-            var gifDark = card.getAttribute('data-hover-gif-dark');
-            var gifFallback = card.getAttribute('data-hover-gif');
+            var attrs = {};
+            ['accent', 'blue', 'bg', 'text', 'photo'].forEach(function (name) {
+                attrs[name] = {
+                    light: card.getAttribute('data-' + (name === 'photo' ? 'photo' : name) + '-light'),
+                    dark: card.getAttribute('data-' + (name === 'photo' ? 'photo' : name) + '-dark')
+                };
+            });
+
+            function applyScheme(isDark) {
+                varNames.forEach(function (varName) {
+                    var key = varName === '--photo-text' ? 'photo' : varName.replace('--', '');
+                    var val = attrs[key] && (isDark ? attrs[key].dark : attrs[key].light);
+                    if (val != null && val !== '') root.style.setProperty(varName, val);
+                });
+            }
 
             card.addEventListener('mouseenter', function () {
-                var isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-                var chosen = isDarkMode ? (gifDark || gifFallback) : (gifLight || gifFallback);
-                if (chosen) {
-                    // ensure it's wrapped as url("path") for CSS var
-                    var urlValue = chosen.trim();
-                    // if the attribute already contains url(...), use as-is
-                    if (!/^url\(/i.test(urlValue)) urlValue = 'url("' + urlValue.replace(/"/g, '\\"') + '")';
-                    team.style.setProperty('--team-hover-gif', urlValue);
-                    team.classList.add('team-gif-active');
-                }
+                var isDarkMode = root.getAttribute('data-theme') === 'dark';
+                applyScheme(isDarkMode);
+                root.classList.add('card-scheme-active');
             });
 
             card.addEventListener('mouseleave', function () {
-                team.classList.remove('team-gif-active');
-                setTimeout(function () { team.style.removeProperty('--team-hover-gif'); }, 400);
+                // remove inline overrides so CSS theme rules take effect again
+                varNames.forEach(function (varName) { root.style.removeProperty(varName); });
+                root.classList.remove('card-scheme-active');
             });
         });
     })();
