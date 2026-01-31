@@ -69,7 +69,7 @@ html { scroll-behavior: smooth; }
 body {
     font-family: 'DM Sans', system-ui, sans-serif;
     background: var(--bg);
-    color: var(--text);
+    color: var(--photo-text, var(--text));
     line-height: 1.6;
     min-height: 100vh;
 }
@@ -140,7 +140,7 @@ nav a:hover { background: var(--accent-light); color: var(--accent); }
 .theme-toggle:hover { background: var(--accent-light); transform: scale(1.05); }
 .btn-cta {
     background: linear-gradient(135deg, var(--accent), var(--blue));
-    color: #fff;
+    color: #0a1210;
     border: none;
     padding: 0.6rem 1.25rem;
     border-radius: 10px;
@@ -225,7 +225,7 @@ nav a:hover { background: var(--accent-light); color: var(--accent); }
 }
 
 html[data-theme="dark"] .hero-text h1 .highlight {
-    background: linear-gradient(90deg, var(--accent), var(--blue), #00ff88, var(--accent));
+    background: linear-gradient(90deg, var(--accent), var(--blue), var(--blue), var(--accent));
     background-size: 300% 300%;
     animation: gradient-shift 2.5s ease-in-out infinite;
     -webkit-background-clip: text;
@@ -259,44 +259,7 @@ html[data-theme="dark"] .hero-text h1 .highlight {
 
 #team .container { position: relative; z-index: 2; }
 
-/* dark tint that sits above the GIF but below content (only in dark mode) */
-#team::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    opacity: 0;
-    transition: opacity 0.35s ease;
-    z-index: 1;
-    pointer-events: none;
-}
-
-html[data-theme="dark"] #team.team-gif-active::after {
-    opacity: 1;
-}
-
-/* fullscreen GIF layer shown behind the team section when a card is hovered */
-#team::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: var(--team-hover-gif, none);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transform: scale(1);
-    transition: opacity 0.35s ease, transform 0.35s ease;
-    filter: none;
-    z-index: 0;
-    pointer-events: none;
-}
-
-/* when JS toggles the class, reveal the GIF */
-#team.team-gif-active::before {
-    opacity: 1;
-    transform: scale(1);
-}
+/* GIF overlay removed: team section uses standard background only */
 .team-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -324,7 +287,7 @@ html[data-theme="dark"] #team.team-gif-active::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--text);
     font-weight: 700;
     font-size: 1.5rem;
 }
